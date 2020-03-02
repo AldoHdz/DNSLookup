@@ -1,4 +1,4 @@
-package com.evocalize.dnslookup.controller;
+package com.evocalize.dnslookup;
 
 import com.evocalize.dnslookup.exception.ServerNotFoundException;
 import com.evocalize.dnslookup.model.DNSLookupRequest;
