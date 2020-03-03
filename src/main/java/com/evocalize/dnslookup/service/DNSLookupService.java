@@ -1,12 +1,13 @@
 package com.evocalize.dnslookup.service;
 
+import com.evocalize.dnslookup.connector.DNSJavaConnector;
 import com.evocalize.dnslookup.exception.ServerNotFoundException;
-import com.evocalize.dnslookup.exception.TextParsingException;
 import com.evocalize.dnslookup.exception.UnsupportedDNSRecordLookupException;
 import com.evocalize.dnslookup.model.BaseType;
 import com.evocalize.dnslookup.model.DNSLookupRequest;
 import com.evocalize.dnslookup.model.DNSLookupResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,12 @@ import java.util.List;
 @Service
 @CacheConfig(cacheNames = {"results"})
 public class DNSLookupService {
+    private DNSJavaConnector dnsJavaConnector;
+
+    @Autowired
+    public DNSLookupService(DNSJavaConnector dnsJavaConnector) {
+        this.dnsJavaConnector = dnsJavaConnector;
+    }
 
     public List<DNSLookupResponse> dnsLookup(DNSLookupRequest request) throws ServerNotFoundException {
         List<DNSLookupResponse> dnsLookupResponses = new ArrayList<>();
@@ -37,14 +44,13 @@ public class DNSLookupService {
         return dnsLookupResponses;
     }
 
-
     private DNSLookupResponse domainNameProcessor(String domainName, String lookupType) throws ServerNotFoundException {
 
         List<BaseType> baseTypes = new ArrayList<>();
 
         switch (lookupType) {
             case "A":
-                for (Record record : dnsLookupConnector(domainName, lookupType)) {
+                for (Record record : dnsJavaConnector.runDNSLookup(domainName, lookupType)) {
                     baseTypes.add(BaseType.builder()
                             .domain((record).getName().toString())
                             .address(((ARecord) record).getAddress().getHostAddress())
@@ -53,7 +59,7 @@ public class DNSLookupService {
                 }
                 return DNSLookupResponse.builder().type(lookupType).response(baseTypes).build();
             case "AAAA":
-                for (Record record : dnsLookupConnector(domainName, lookupType)) {
+                for (Record record : dnsJavaConnector.runDNSLookup(domainName, lookupType)) {
                     baseTypes.add(BaseType.builder()
                             .domain((record).getName().toString())
                             .address(((AAAARecord) record).getAddress().getHostAddress())
@@ -62,7 +68,7 @@ public class DNSLookupService {
                 }
                 return DNSLookupResponse.builder().type(lookupType).response(baseTypes).build();
             case "TXT":
-                for (Record record : dnsLookupConnector(domainName, lookupType)) {
+                for (Record record : dnsJavaConnector.runDNSLookup(domainName, lookupType)) {
                     baseTypes.add(BaseType.builder()
                             .domain((record).getName().toString())
                             .records((((TXTRecord) record).getStrings()))
@@ -71,7 +77,7 @@ public class DNSLookupService {
                 }
                 return DNSLookupResponse.builder().type(lookupType).response(baseTypes).build();
             case "NS":
-                for (Record record : dnsLookupConnector(domainName, lookupType)) {
+                for (Record record : dnsJavaConnector.runDNSLookup(domainName, lookupType)) {
                     baseTypes.add(BaseType.builder()
                             .domain((record).getName().toString())
                             .nsdName((record).getAdditionalName().toString())
@@ -80,7 +86,7 @@ public class DNSLookupService {
                 }
                 return DNSLookupResponse.builder().type(lookupType).response(baseTypes).build();
             case "MX":
-                for (Record record : dnsLookupConnector(domainName, lookupType)) {
+                for (Record record : dnsJavaConnector.runDNSLookup(domainName, lookupType)) {
                     baseTypes.add(BaseType.builder()
                             .domain((record).getName().toString())
                             .exchange((record).getAdditionalName().toString())
@@ -90,7 +96,7 @@ public class DNSLookupService {
                 }
                 return DNSLookupResponse.builder().type(lookupType).response(baseTypes).build();
             case "SOA":
-                for (Record record : dnsLookupConnector(domainName, lookupType)) {
+                for (Record record : dnsJavaConnector.runDNSLookup(domainName, lookupType)) {
                     baseTypes.add(BaseType.builder()
                             .domain((record).getName().toString())
                             .mName(((SOARecord) record).getHost().toString())
@@ -106,24 +112,6 @@ public class DNSLookupService {
                 return DNSLookupResponse.builder().type(lookupType).response(baseTypes).build();
             default:
                 throw new UnsupportedDNSRecordLookupException("The DNS record type: " + lookupType + " is currently unsupported.");
-
         }
     }
-
-    private Record[] dnsLookupConnector(String domainName, String lookupType) {
-        Record[] lookupRecords;
-
-        try {
-            lookupRecords = new Lookup(domainName, Type.value(lookupType)).run();
-            if (lookupRecords == null) {
-                throw new ServerNotFoundException("DNSLookup was unable to resolve the domainName: " + domainName + " for recordTYpe: " + lookupType);
-            }
-
-        } catch (TextParseException e) {
-            throw new TextParsingException("DnsLookup was unable to parse the text: " + domainName);
-        }
-        return lookupRecords;
-    }
-
-
 }
