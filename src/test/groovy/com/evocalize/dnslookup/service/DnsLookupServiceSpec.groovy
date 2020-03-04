@@ -150,5 +150,4 @@ class DNSLookupServiceSpec extends Specification {
                                                                                          .mName("ns1.google.com.")
                                                                                          .rName("dns-admin.google.com.").build()])
                                                                       .build()]
-
 }
