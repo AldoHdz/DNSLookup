@@ -3,13 +3,7 @@ import com.evocalize.dnslookup.model.BaseType
 import com.evocalize.dnslookup.model.DNSLookupRequest
 import com.evocalize.dnslookup.model.DNSLookupResponse
 import com.evocalize.dnslookup.service.DNSLookupService
-import org.xbill.DNS.AAAARecord
-import org.xbill.DNS.ARecord
-import org.xbill.DNS.MXRecord
-import org.xbill.DNS.NSRecord
-import org.xbill.DNS.Name
-import org.xbill.DNS.SOARecord
-import org.xbill.DNS.TXTRecord
+import org.xbill.DNS.*
 import spock.lang.Specification
 
 class DNSLookupServiceSpec extends Specification {
