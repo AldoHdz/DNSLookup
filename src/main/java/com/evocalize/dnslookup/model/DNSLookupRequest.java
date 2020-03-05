@@ -15,7 +15,7 @@ public class DNSLookupRequest {
 
     @JsonCreator
     public DNSLookupRequest(@JsonProperty("lookup") String lookup,
-                            @JsonProperty("recordTypes") List<String> recordTypes){
+                            @JsonProperty("recordTypes") List<String> recordTypes) {
         this.lookup = lookup;
         this.recordTypes = recordTypes;
     }
