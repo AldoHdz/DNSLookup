@@ -5,9 +5,10 @@ import lombok.Data;
 
 import java.util.List;
 
-@Data
 @Builder
-public class DNSLookupResponse{
-    private String type;
-    private List<Object> response;
+@Data
+public class TXTRecord{
+    String domain;
+    Long ttl;
+    List<String> records;
 }

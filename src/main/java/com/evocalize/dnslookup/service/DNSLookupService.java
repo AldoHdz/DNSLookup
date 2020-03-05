@@ -3,7 +3,7 @@ package com.evocalize.dnslookup.service;
 import com.evocalize.dnslookup.connector.DNSJavaConnector;
 import com.evocalize.dnslookup.exception.ServerNotFoundException;
 import com.evocalize.dnslookup.exception.UnsupportedDNSRecordLookupException;
-import com.evocalize.dnslookup.model.BaseType;
+import com.evocalize.dnslookup.model.ARecord;
 import com.evocalize.dnslookup.model.DNSLookupRequest;
 import com.evocalize.dnslookup.model.DNSLookupResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -46,88 +46,95 @@ public class DNSLookupService {
 
     private DNSLookupResponse domainNameProcessor(String domainName, String lookupType) throws ServerNotFoundException {
 
-        List<BaseType> baseTypes = new ArrayList<>();
+        List<Object> records = new ArrayList<>();
 
         switch (lookupType) {
             case "A":
                 for (Record record : dnsJavaConnector.runDNSLookup(domainName, lookupType)) {
-                    buildARecordForResponse(baseTypes, record);
+                    buildARecordForResponse(records, record);
                 }
-                return DNSLookupResponse.builder().type(lookupType).response(baseTypes).build();
+                return DNSLookupResponse.builder().type(lookupType).response(records).build();
             case "AAAA":
                 for (Record record : dnsJavaConnector.runDNSLookup(domainName, lookupType)) {
-                    buildAAAARecordForResponse(baseTypes, record);
+                    buildAAAARecordForResponse(records, record);
                 }
-                return DNSLookupResponse.builder().type(lookupType).response(baseTypes).build();
+                return DNSLookupResponse.builder().type(lookupType).response(records).build();
             case "TXT":
                 for (Record record : dnsJavaConnector.runDNSLookup(domainName, lookupType)) {
-                    buildTXTRecordForResponse(baseTypes, record);
+                    buildTXTRecordForResponse(records, record);
                 }
-                return DNSLookupResponse.builder().type(lookupType).response(baseTypes).build();
+                return DNSLookupResponse.builder().type(lookupType).response(records).build();
             case "NS":
                 for (Record record : dnsJavaConnector.runDNSLookup(domainName, lookupType)) {
-                    buildNSRecordForResponse(baseTypes, record);
+                    buildNSRecordForResponse(records, record);
                 }
-                return DNSLookupResponse.builder().type(lookupType).response(baseTypes).build();
+                return DNSLookupResponse.builder().type(lookupType).response(records).build();
             case "MX":
                 for (Record record : dnsJavaConnector.runDNSLookup(domainName, lookupType)) {
-                    buildMXRecordForResponse(baseTypes, record);
+                    buildMXRecordForResponse(records, record);
                 }
-                return DNSLookupResponse.builder().type(lookupType).response(baseTypes).build();
+                return DNSLookupResponse.builder().type(lookupType).response(records).build();
             case "SOA":
                 for (Record record : dnsJavaConnector.runDNSLookup(domainName, lookupType)) {
-                    buildSOARecordForResponse(baseTypes, record);
+                    buildSOARecordForResponse(records, record);
                 }
-                return DNSLookupResponse.builder().type(lookupType).response(baseTypes).build();
+                return DNSLookupResponse.builder().type(lookupType).response(records).build();
             default:
                 throw new UnsupportedDNSRecordLookupException("The DNS record type: " + lookupType + " is currently unsupported.");
         }
     }
 
-    private void buildARecordForResponse(List<BaseType> baseTypes, Record record) {
-        baseTypes.add(BaseType.builder()
-                .domain((record).getName().toString())
-                .address(((ARecord) record).getAddress().getHostAddress())
-                .ttl((record).getTTL())
+    private void buildARecordForResponse(List<Object> baseTypes, Record record) {
+        baseTypes.add(ARecord.builder().domain((record).getName().toString())
+                .address(((org.xbill.DNS.ARecord) record).getAddress().getHostAddress())
+                .ttl(record.getTTL())
                 .build());
     }
 
-    private void buildAAAARecordForResponse(List<BaseType> baseTypes, Record record) {
-        baseTypes.add(BaseType.builder()
-                .domain((record).getName().toString())
+    private void buildAAAARecordForResponse(List<Object> baseTypes, Record record) {
+
+        baseTypes.add(com.evocalize.dnslookup.model.AAAARecord.builder()
+                .domain(record.getName().toString())
                 .address(((AAAARecord) record).getAddress().getHostAddress())
-                .ttl((record).getTTL())
+                .ttl(record.getTTL())
                 .build());
+
+
     }
 
-    private void buildTXTRecordForResponse(List<BaseType> baseTypes, Record record) {
-        baseTypes.add(BaseType.builder()
+    private void buildTXTRecordForResponse(List<Object> baseTypes, Record record) {
+
+        baseTypes.add(com.evocalize.dnslookup.model.TXTRecord.builder()
                 .domain((record).getName().toString())
                 .records((((TXTRecord) record).getStrings()))
-                .ttl((record).getTTL())
+                .ttl(record.getTTL())
                 .build());
     }
 
-    private void buildNSRecordForResponse(List<BaseType> baseTypes, Record record) {
-        baseTypes.add(BaseType.builder()
-                .domain((record).getName().toString())
-                .nsdName((record).getAdditionalName().toString())
-                .ttl((record).getTTL())
+    private void buildNSRecordForResponse(List<Object> baseTypes, Record record) {
+
+        baseTypes.add(com.evocalize.dnslookup.model.NSRecord.builder()
+                .domain(record.getName().toString())
+                .nsdName(record.getAdditionalName().toString())
+                .ttl(record.getTTL())
                 .build());
+
     }
 
-    private void buildMXRecordForResponse(List<BaseType> baseTypes, Record record) {
-        baseTypes.add(BaseType.builder()
-                .domain((record).getName().toString())
-                .exchange((record).getAdditionalName().toString())
+    private void buildMXRecordForResponse(List<Object> baseTypes, Record record) {
+
+        baseTypes.add(com.evocalize.dnslookup.model.MXRecord.builder()
+                .domain(record.getName().toString())
+                .exchange(record.getAdditionalName().toString())
                 .preference(((MXRecord) record).getPriority())
-                .ttl((record).getTTL())
+                .ttl(record.getTTL())
                 .build());
     }
 
-    private void buildSOARecordForResponse(List<BaseType> baseTypes, Record record) {
-        baseTypes.add(BaseType.builder()
-                .domain((record).getName().toString())
+    private void buildSOARecordForResponse(List<Object> baseTypes, Record record) {
+
+        baseTypes.add(com.evocalize.dnslookup.model.SOARecord.builder()
+                .domain(record.getName().toString())
                 .mName(((SOARecord) record).getHost().toString())
                 .rName(((SOARecord) record).getAdmin().toString())
                 .serial(((SOARecord) record).getSerial())
@@ -135,7 +142,7 @@ public class DNSLookupService {
                 .retry(((SOARecord) record).getRetry())
                 .expire(((SOARecord) record).getExpire())
                 .minimum(((SOARecord) record).getMinimum())
-                .ttl((record).getTTL())
+                .ttl(record.getTTL())
                 .build());
     }
 }
