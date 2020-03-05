@@ -5,7 +5,6 @@ import com.evocalize.dnslookup.model.DNSLookupRequest;
 import com.evocalize.dnslookup.model.DNSLookupResponse;
 import com.evocalize.dnslookup.service.DNSLookupService;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

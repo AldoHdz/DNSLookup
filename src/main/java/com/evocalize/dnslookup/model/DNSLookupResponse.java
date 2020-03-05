@@ -9,5 +9,5 @@ import java.util.List;
 @Builder
 public class DNSLookupResponse{
     private String type;
-    private List<BaseType> response;
+    private List<Object> response;
 }

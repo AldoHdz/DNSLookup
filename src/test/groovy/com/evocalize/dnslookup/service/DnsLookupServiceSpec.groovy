@@ -1,5 +1,4 @@
 import com.evocalize.dnslookup.connector.DNSJavaConnector
-import com.evocalize.dnslookup.model.BaseType
 import com.evocalize.dnslookup.model.DNSLookupRequest
 import com.evocalize.dnslookup.model.DNSLookupResponse
 import com.evocalize.dnslookup.service.DNSLookupService
@@ -51,12 +50,12 @@ class DNSLookupServiceSpec extends Specification {
         TXT_RECORD == actual
     }
 
-    def "DNSLookup returns expected data when MX record is specified"() {
+    def "DNSLookup returns expected data when NS record is specified"() {
         given:
         def request = new DNSLookupRequest.DNSLookupRequestBuilder().lookup("www.google.com").recordTypes(["NS"]).build()
-        dnsJavaConnector.runDNSLookup(_, _) >> [new NSRecord(new Name("google.com."), 1, 331576, new Name("ns3.google.com.")),
-                                                new NSRecord(new Name("google.com."), 1, 331576, new Name("ns1.google.com.")),
+        dnsJavaConnector.runDNSLookup(_, _) >> [new NSRecord(new Name("google.com."), 1, 331576, new Name("ns1.google.com.")),
                                                 new NSRecord(new Name("google.com."), 1, 331576, new Name("ns2.google.com.")),
+                                                new NSRecord(new Name("google.com."), 1, 331576, new Name("ns3.google.com.")),
                                                 new NSRecord(new Name("google.com."), 1, 331576, new Name("ns4.google.com."))]
 
         when:
@@ -66,7 +65,7 @@ class DNSLookupServiceSpec extends Specification {
         NS_RECORD == actual
     }
 
-    def "DNSLookup returns expected data when NS record is specified"() {
+    def "DNSLookup returns expected data when MX record is specified"() {
         given:
         def request = new DNSLookupRequest.DNSLookupRequestBuilder().lookup("www.google.com").recordTypes(["MX"]).build()
         dnsJavaConnector.runDNSLookup(_, _) >> [new MXRecord(new Name("google.com."), 1, 417, 10, new Name("aspmx.l.google.com.")),
@@ -102,45 +101,46 @@ class DNSLookupServiceSpec extends Specification {
         SOA_RECORD == actual
     }
 
+
     public static final List<DNSLookupResponse> A_RECORD = [DNSLookupResponse.builder()
                                                                     .type("A")
-                                                                    .response([BaseType.builder().domain("google.com.").address("0.0.0.0").ttl(30).build()])
+                                                                    .response([com.evocalize.dnslookup.model.ARecord.builder().domain("google.com.").address("0.0.0.0").ttl(30).build()])
                                                                     .build()]
 
     public static final List<DNSLookupResponse> AAAA_RECORD = [DNSLookupResponse.builder()
                                                                        .type("AAAA")
-                                                                       .response([BaseType.builder().domain("google.com.").address("0:0:0:0:0:0:0:0").ttl(189).build()])
+                                                                       .response([com.evocalize.dnslookup.model.AAAARecord.builder().domain("google.com.").address("0:0:0:0:0:0:0:0").ttl(189).build()])
                                                                        .build()]
 
     public static final List<DNSLookupResponse> TXT_RECORD = [DNSLookupResponse.builder()
                                                                       .type("TXT")
-                                                                      .response([BaseType.builder().domain("google.com.").records(["facebook-domain-verification=22rm551cu4k0ab0bxsw536tlds4h95"]).ttl(189).build(),
-                                                                                 BaseType.builder().domain("google.com.").records(["lobalsign-smime-dv=CDYX+XFHUw2wml6/Gb8+59BsH31KzUr6c1l2BPvqKX8="]).ttl(189).build(),
-                                                                                 BaseType.builder().domain("google.com.").records(["docusign=05958488-4752-4ef2-95eb-aa7ba8a3bd0e"]).ttl(189).build(),
-                                                                                 BaseType.builder().domain("google.com.").records(["docusign=1b0a6754-49b1-4db5-8540-d2c12664b289"]).ttl(189).build(),
-                                                                                 BaseType.builder().domain("google.com.").records(["v=spf1 include:_spf.google.com ~all"]).ttl(189).build()])
+                                                                      .response([com.evocalize.dnslookup.model.TXTRecord.builder().domain("google.com.").records(["facebook-domain-verification=22rm551cu4k0ab0bxsw536tlds4h95"]).ttl(189).build(),
+                                                                                 com.evocalize.dnslookup.model.TXTRecord.builder().domain("google.com.").records(["lobalsign-smime-dv=CDYX+XFHUw2wml6/Gb8+59BsH31KzUr6c1l2BPvqKX8="]).ttl(189).build(),
+                                                                                 com.evocalize.dnslookup.model.TXTRecord.builder().domain("google.com.").records(["docusign=05958488-4752-4ef2-95eb-aa7ba8a3bd0e"]).ttl(189).build(),
+                                                                                 com.evocalize.dnslookup.model.TXTRecord.builder().domain("google.com.").records(["docusign=1b0a6754-49b1-4db5-8540-d2c12664b289"]).ttl(189).build(),
+                                                                                 com.evocalize.dnslookup.model.TXTRecord.builder().domain("google.com.").records(["v=spf1 include:_spf.google.com ~all"]).ttl(189).build()])
                                                                       .build()]
 
     public static final List<DNSLookupResponse> NS_RECORD = [DNSLookupResponse.builder()
                                                                      .type("NS")
-                                                                     .response([BaseType.builder().domain("google.com.").nsdName("ns3.google.com.").ttl(331576).build(),
-                                                                                BaseType.builder().domain("google.com.").nsdName("ns1.google.com.").ttl(331576).build(),
-                                                                                BaseType.builder().domain("google.com.").nsdName("ns2.google.com.").ttl(331576).build(),
-                                                                                BaseType.builder().domain("google.com.").nsdName("ns4.google.com.").ttl(331576).build()])
+                                                                     .response([com.evocalize.dnslookup.model.NSRecord.builder().domain("google.com.").nsdName("ns1.google.com.").ttl(331576).build(),
+                                                                                com.evocalize.dnslookup.model.NSRecord.builder().domain("google.com.").nsdName("ns2.google.com.").ttl(331576).build(),
+                                                                                com.evocalize.dnslookup.model.NSRecord.builder().domain("google.com.").nsdName("ns3.google.com.").ttl(331576).build(),
+                                                                                com.evocalize.dnslookup.model.NSRecord.builder().domain("google.com.").nsdName("ns4.google.com.").ttl(331576).build()])
                                                                      .build()]
 
     public static final List<DNSLookupResponse> MX_RECORD = [DNSLookupResponse.builder()
                                                                      .type("MX")
-                                                                     .response([BaseType.builder().domain("google.com.").exchange("aspmx.l.google.com.").ttl(417).preference(10).build(),
-                                                                                BaseType.builder().domain("google.com.").exchange("alt1.aspmx.l.google.com.").ttl(417).preference(20).build(),
-                                                                                BaseType.builder().domain("google.com.").exchange("alt2.aspmx.l.google.com.").ttl(417).preference(30).build(),
-                                                                                BaseType.builder().domain("google.com.").exchange("alt3.aspmx.l.google.com.").ttl(417).preference(40).build(),
-                                                                                BaseType.builder().domain("google.com.").exchange("alt4.aspmx.l.google.com.").ttl(417).preference(50).build()])
+                                                                     .response([com.evocalize.dnslookup.model.MXRecord.builder().domain("google.com.").exchange("aspmx.l.google.com.").ttl(417).preference(10).build(),
+                                                                                com.evocalize.dnslookup.model.MXRecord.builder().domain("google.com.").exchange("alt1.aspmx.l.google.com.").ttl(417).preference(20).build(),
+                                                                                com.evocalize.dnslookup.model.MXRecord.builder().domain("google.com.").exchange("alt2.aspmx.l.google.com.").ttl(417).preference(30).build(),
+                                                                                com.evocalize.dnslookup.model.MXRecord.builder().domain("google.com.").exchange("alt3.aspmx.l.google.com.").ttl(417).preference(40).build(),
+                                                                                com.evocalize.dnslookup.model.MXRecord.builder().domain("google.com.").exchange("alt4.aspmx.l.google.com.").ttl(417).preference(50).build()])
                                                                      .build()]
 
     public static final List<DNSLookupResponse> SOA_RECORD = [DNSLookupResponse.builder()
                                                                       .type("SOA")
-                                                                      .response([BaseType.builder().domain("google.com.")
+                                                                      .response([com.evocalize.dnslookup.model.SOARecord.builder().domain("google.com.")
                                                                                          .ttl(21)
                                                                                          .serial(298310260)
                                                                                          .refresh(900)
