@@ -2,7 +2,7 @@
 
 ## Introduction
 
-> A simple Java REST service that serves as a basic example of how one might establish an API and Spring and Spock frameworks
+> A simple Java REST service that serves as a basic example of how one might establish an API and use Spring, Spock, and Swagger frameworks.
 
 ## Installation
 
